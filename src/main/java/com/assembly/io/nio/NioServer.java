@@ -44,8 +44,20 @@ public class NioServer {
         System.out.println("listen on : " + port);
         //轮询
         while (true){
-            //阻塞
-            int selectNum = selector.select();
+            /**
+             * NIO的非阻塞体现在这里
+             * 1、当客户端连接时会收到一个accept的key
+             * 2、服务端将该key设置为readable
+             * 3、服务端等待所有客户端请求（非阻塞）
+             * 4、刚连接的客户端flush数据后服务端收到readable的请求进行处理
+             *
+             *
+             * 个人理解
+             * 将连接和数据发送flush隔离开来，BIO连接上后就必须等待数据准备、发送，
+             * 而NIO连接上后，可以处理其他的连接请求，各客户端连接后数据准备完毕flush后，
+             * 服务端再进行处理，服务端对连接设置了状态用来处理
+             */
+            int selectNum = selector.select();//没有连接时阻塞进程
             System.out.println("selectNum " + selectNum);
             //获取客户集合
             Set<SelectionKey> selectionKeys = selector.selectedKeys();
